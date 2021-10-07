@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        table {
+            border: solid 1px #ccc;
+        }
+
+        tr {
+            border: solid red 1px;
+        }
+
+
+
+        span:hover {
+            color: red;
+            cursor: pointer;
+        }
+
+        .price {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>我的购物车</h1>
+    <input type="text"><button>搜索</button>
+    <hr>
+    <div id="app">
+        <table>
+            <tr>
+                <th>序号</th>
+                <th>商品</th>
+                <th>单价</th>
+                <th>数量</th>
+                <th>操作</th>
+            </tr>
+            <tr v-for="(item , index) in list">
+                <td>{{index+1}}</td>
+                <td>{{item.goods}}</td>
+                <td>{{item.price}}</td>
+                <td>
+                    <button @click='minus(item.id,item.amount)'>-</button>
+                    <input type="text" v-model='item.amount'>
+                    <button @click='add(item.id,item.amount)'>+</button>
+                </td>
+                <td>
+                    <span @click='del(item.id)'>删除</span>
+                </td>
+            </tr>
+        </table>
+        <div>
+            已选择<span class="price">{{total}}</span>商品 总价：￥<span class="price">{{ total1 }}</span><button>去结算</button>
+        </div>
+    </div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/vue/2.6.14/vue.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/axios/0.21.1/axios.js"></script>
+<script>
+    Vue.prototype.$axios = axios;
+    const vm = new Vue({
+        el: '#app',
+        data: {
+            list: ''
+        },
+        methods:{
+            minus(id,amount){
+                this.$axios.get(`http://localhost:4000/amount?id=${id}&amount=${amount}&state=0`)
+                .then(res => {
+                    console.log('成功')
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            },
+            add(id,amount){
+                this.$axios.get(`http://localhost:4000/amount?id=${id}&amount=${amount}&state=1`)
+                .then(res => {
+                    console.log('成功')
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            },
+            del(id){
+                this.$axios.get(`http://localhost:4000/delete?id=${id}`)
+                .then(res => {
+                    console.log('成功')
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            }
+        },
+        computed:{
+            total:function(){
+                let total = 0;
+                this.list.forEach(item => {
+                    total += item.amount;
+                })
+                return total.toString()
+            },
+            total1:function(){
+                let total = 0;
+                this.list.forEach(item => {
+                    total += item.price * item.amount;
+                })
+                return total.toString();
+            }
+        },
+        created: function () {
+            this.$axios.get('http://localhost:4000/index')
+                .then(res => {
+                    this.list = res.data;
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+        },
+    })
+
+    
+</script>
+
+</html>
