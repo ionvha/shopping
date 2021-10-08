@@ -37,6 +37,33 @@ app.get('/',(req,res)=>{
     res.sendFile(path.join(__dirname,'/views/index.html'))
 })
 
+// 添加产品页面
+app.get('/add',(req,res) => {
+    res.sendFile(path.join(__dirname,'/views/add.html'))
+})
+
+// 数据库添加产品
+
+app.get('/addgoods',(req,res)=>{
+    console.log(req.query);
+    let {goods,price,amount} = (req.query);
+    let sql = `insert into productlist(goods,price,amount)value('${goods}','${price}','${amount}')`;
+    connection.query(sql,(err,result)=>{
+        if(result.affectedRows){
+            console.log('添加成功')
+        }
+    })
+})
+
+// 关键字搜索
+app.get('/search',(req,res) => {
+    let {search} = req.query;
+    let sql = `select * from productlist where goods like '%${search}%'`
+    connection.query(sql,(err,result) => {
+        res.json(result)
+    })
+})
+
 // 获取后台数据
 app.get('/index',(req,res)=>{
     let sql = `select * from productlist`
@@ -56,19 +83,20 @@ app.get('/amount',(req,res)=>{
     let sql = `update productlist set amount = ${amount} where id = ${id}`
     connection.query(sql,(err,result)=>{
         if(result.affectedRows){
-            console.log('成功')
+            res.json(result)
         }else {
             console.log(err);
         }
     })
 })
 
+// 删除当前产品
 app.get('/delete',(req,res) => {
     let {id} = req.query;
     let sql = `delete from productlist where id = ${id}`
     connection.query(sql,(err,result) => {
         if(result.affectedRows){
-            console.log('成功')
+            res.json(result)
         }else {
             console.log('失败')
         }

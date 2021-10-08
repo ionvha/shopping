@@ -30,9 +30,8 @@
 
 <body>
     <h1>我的购物车</h1>
-    <input type="text"><button>搜索</button>
-    <hr>
     <div id="app">
+        <input type="text" v-model='search'><button @click='searchs'>搜索</button>
         <table>
             <tr>
                 <th>序号</th>
@@ -56,7 +55,8 @@
             </tr>
         </table>
         <div>
-            已选择<span class="price">{{total}}</span>商品 总价：￥<span class="price">{{ total1 }}</span><button>去结算</button>
+            已选择<span class="price">{{ total }}</span>商品 总价：￥<span class="price">{{ total1 }}</span><button>去结算</button>
+            <button @click='addElen'>添加新产品</button>
         </div>
     </div>
 </body>
@@ -67,50 +67,69 @@
     const vm = new Vue({
         el: '#app',
         data: {
-            list: ''
+            list: '',
+            search:''
         },
-        methods:{
-            minus(id,amount){
+        methods: {
+            searchs(){
+                this.$axios.get(`http://localhost:4000/search?search=${this.search}`)
+                    .then(res => {
+                        this.list = res.data;
+                    })
+            },
+            minus(id, amount) {
                 this.$axios.get(`http://localhost:4000/amount?id=${id}&amount=${amount}&state=0`)
-                .then(res => {
-                    console.log('成功')
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+                    .then(res => {
+                        this.$axios.get('http://localhost:4000/index')
+                            .then(res => {
+                                this.list = res.data;
+                            })
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
             },
-            add(id,amount){
+            add(id, amount) {
                 this.$axios.get(`http://localhost:4000/amount?id=${id}&amount=${amount}&state=1`)
-                .then(res => {
-                    console.log('成功')
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+                    .then(res => {
+                        this.$axios.get('http://localhost:4000/index')
+                            .then(res => {
+                                this.list = res.data;
+                            })
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
             },
-            del(id){
+            del(id) {
                 this.$axios.get(`http://localhost:4000/delete?id=${id}`)
-                .then(res => {
-                    console.log('成功')
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+                    .then(res => {
+                        this.$axios.get('http://localhost:4000/index')
+                            .then(res => {
+                                this.list = res.data;
+                            })
+                    })
+                    .catch(err => {
+                        console.log(err)
+                    })
+            },
+            addElen(){
+                location.href = 'http://localhost:4000/add'
             }
         },
-        computed:{
-            total:function(){
+        computed: {
+            total: function () {
                 let total = 0;
-                this.list.forEach(item => {
-                    total += item.amount;
-                })
+                for (var i = 0; i < this.list.length; i++) {
+                    total += this.list[i].amount;
+                }
                 return total.toString()
             },
-            total1:function(){
+            total1: function () {
                 let total = 0;
-                this.list.forEach(item => {
-                    total += item.price * item.amount;
-                })
+                for (var i = 0; i < this.list.length; i++) {
+                    total += this.list[i].price * this.list[i].amount;
+                }
                 return total.toString();
             }
         },
@@ -124,8 +143,6 @@
                 })
         },
     })
-
-    
 </script>
 
 </html>
